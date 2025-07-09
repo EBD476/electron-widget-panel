@@ -1,0 +1,22 @@
+{
+  "database": {
+    "oracle": {
+      "connections": [
+        {
+          "name": "db1",
+          "username": "user",
+          "password": "pass",
+          "connectionString": "url",
+          "defaultQuery": "DELETE from db"
+        },
+        {
+          "name": "db2",
+          "username": "user",
+          "connectionString": "url",
+          "password": "pass",
+          "defaultQuery": "DELETE from db2"
+        }
+      ]
+    }
+  }
+}
