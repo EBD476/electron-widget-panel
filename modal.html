@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Select Service</title>
+  <style>
+          * {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: -moz-none;
+        -o-user-select: none;
+        user-select: none;
+    }
+
+        body::-webkit-scrollbar {
+      width: var(--sb-size)
+    }
+
+    body::-webkit-scrollbar-track {
+      background: var(--sb-track-color);
+      border-radius: 1px;
+    }
+
+    body::-webkit-scrollbar-thumb {
+      background: var(--sb-thumb-color);
+      border-radius: 1px;
+      
+    }
+        @supports not selector(::-webkit-scrollbar) {
+      body {
+        scrollbar-color: var(--sb-thumb-color)
+                        var(--sb-track-color);
+      }
+    }
+        body {
+      margin: 0;
+      padding: 10px;
+      font-family: 'ubuntu', Arial, sans-serif;
+      background-color: rgba(240, 240, 240, 0.9);
+      border-radius: 10px;
+      --sb-track-color: #dbdbdb;
+      --sb-thumb-color: #bdc2bf;
+      --sb-size: 5px;
+    }
+    div , select{
+          font-family: 'ubuntu', Arial, sans-serif;
+    }
+   .drag-handle {
+      -webkit-app-region: drag;
+      height: 25px;
+      width: 100%;
+      background-color: #c6c7ca;
+      margin-bottom: 15px;
+      padding-top:5px;      
+      text-align: center;
+      cursor: move;
+      font-family: 'ubuntu', Arial, sans-serif;
+      font-size:14px;      
+      position: fixed;
+      top:0;
+      left:0;
+    }
+    button {
+      /* display: block; */
+      width: 100px;
+      padding: 5px 10px;
+      margin: 3px 0;
+      background-color: #93C536;
+      color: white;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;      
+      text-align: center;
+      transition: background-color 0.2s;
+      font-family: 'ubuntu', Arial, sans-serif;
+      border : none;            
+    }
+    select {
+      padding: 2px 10px;
+      border: 1px solid #3F8F43;
+      cursor: pointer;  
+    }
+    button:hover{
+      background-color: #3F8F43;
+    }
+  </style>
+</head>
+<body>
+  <div class="drag-handle">Select service</div>  
+  <br>
+  <div style="height:20px"></div>  
+  <br/>
+  <form id="serviceForm">
+    <label for="serviceSelect">Service:&nbsp;&nbsp;</label>
+    <select id="serviceSelect" required>
+      <option value="" disabled selected>Select a service</option>
+      <option value="configserver">Configserver</option>
+      <option value="casemanagement">Casemanagement</option>
+      <option value="datamanagement">Datamanagement</option>
+      <option value="definition">Definition</option>
+      <option value="kavoshui">Kavoshui</option>
+      <option value="kavoushai">Kavoushai</option>
+      <option value="modelmanagement">Modelmanagement</option>
+      <option value="oltpdetection">Oltpdetection</option>
+      <option value="servicegateway">Servicegateway</option>
+      <option value="uigateway">Uigateway</option>
+      <option value="usermanagement">Usermanagement</option>
+    </select>
+    <br />
+    <div style="text-align: right; margin-top: 10px;">
+      <button type="submit">Start</button>
+      <button onclick="window.close()">Close</button>
+    </div>
+  </form>
+
+  <script>
+    const form = document.getElementById('serviceForm');
+    const select = document.getElementById('serviceSelect');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const selectedService = select.value;
+      if (selectedService) {
+        window.electron.submitDeployParameter(selectedService);
+        window.close()
+      }
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Link Widget</title>
+  <style>
+      * {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: -moz-none;
+        -o-user-select: none;
+        user-select: none;
+    }
+    body::-webkit-scrollbar {
+      width: var(--sb-size)
+    }
+
+    body::-webkit-scrollbar-track {
+      background: var(--sb-track-color);
+      border-radius: 1px;
+    }
+
+    body::-webkit-scrollbar-thumb {
+      background: var(--sb-thumb-color);
+      border-radius: 1px;
+      
+    }
+    @supports not selector(::-webkit-scrollbar) {
+      body {
+        scrollbar-color: var(--sb-thumb-color)
+                        var(--sb-track-color);
+      }
+    }
+
+   .tree-content {
+      padding: 5px 0 5px 15px;
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    body {
+      margin: 0;
+      padding: 10px;
+      font-family: 'ubuntu', Arial, sans-serif;
+      background-color: rgba(240, 240, 240, 0.9);
+      border-radius: 10px;
+      --sb-track-color: #dbdbdb;
+      --sb-thumb-color: #bdc2bf;
+      --sb-size: 5px;
+    }
+    button {
+      font-family: 'ubuntu', Arial, sans-serif;
+      border : none;
+      background-color: #a4b1c9;
+      cursor: pointer;
+    }
+    button:hover{
+        background-color: #808da5;
+    }
+    .link-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .link-btn , .file-btn , .db-btn , .web-btn ,.deploy-btn {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      margin: 3px 0;
+      background-color: #93C536;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.2s;
+      font-family: 'ubuntu', Arial, sans-serif;
+    }
+    .file-btn {
+      background-color: #4CAF50
+    }
+    .link-btn:hover ,  .file-btn:hover , .db-btn:hover , .web-btn:hover ,  .deploy-btn:hover{
+      background-color: #3F8F43;
+    }
+    .start-btn-active{
+      background-color: #00b4d8;
+    }
+    .stop-btn-active{
+      background-color: #e63946;
+    }
+    .drag-handle {
+      -webkit-app-region: drag;
+      height: 25px;
+      width: 100%;
+      background-color: #c6c7ca;
+      margin-bottom: 15px;
+      /* padding-top:5px;       */
+      text-align: center;
+      cursor: move;
+      font-family: 'ubuntu', Arial, sans-serif;
+      font-size:14px;      
+      position: fixed;
+      top:0;
+      left:0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+   .drag-handle button {
+      -webkit-app-region: no-drag; /* so button is clickable */      
+      border: none;            
+      cursor: pointer;
+      outline: none;
+      background: transparent;
+    }
+
+    .drag-handle button:active {
+         outline: none;
+    }
+
+     .tree-container {
+      /* // margin-top: 5px; */
+    }
+    .tree-node {
+      margin-bottom: 5px;
+    }    
+    .deploy-header{
+      margin-top: 3px;
+    }
+    .deploy-header .start-btn{
+      margin-left: 40%;      
+    }
+    .tree-header {
+      padding: 5px 5px;
+      background-color: #607D8B;
+      color: white;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-family: 'ubuntu', Arial, sans-serif;
+    }
+    .tree-header:hover {
+      background-color: #546E7A;
+    }
+    .tree-content {
+      padding: 5px 0 5px 5px;
+      display: none;
+    }
+    .tree-content.show {
+      display: block;
+    }
+    .hidden{
+        display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="drag-handle">
+    <div>&nbsp;</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;Workspace</div>  
+  <div><button  id="workspace-header">[ - ]</button></div>
+  </div>
+  <br>
+  <div style="height:8px"></div>
+  <div id="workspace-body" >
+  <div class="link-container">
+    <div class="tree-container">    
+    <div class="tree-node">
+      <div class="tree-header" onclick="toggleTree(this)">
+        <span>Use-test 131</span>
+        <span class="caret">›</span>
+      </div>
+      <div class="tree-content show">
+          <button class="web-btn" data-url="https://tej.kavosh.isc.co.ir:8001/#/login">Kavosuh Panel</button>  
+          <button class="link-btn" data-url="http://localhost:8093/test/api/test-all-sync/1/1">Run sync test</button>          
+          <!-- <button class="link-btn" data-url="http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/5952">Reset-online-profile-5952</button>
+          <button class="link-btn" data-url="http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/7952">Reset-online-profile-7952</button> -->
+          <button id="resetProfiles" class="db-btn">Reset online profiles</button>
+          <button id="connectDb" class="db-btn">Clear SVG table</button>
+      </div>
+    </div>
+    
+    <div class="link-container">
+    <div class="tree-container">    
+    <div class="tree-node">
+      <div class="tree-header" onclick="toggleTree(this)">
+        <span>Use-test Kish</span>
+        <span class="caret">›</span>
+      </div>
+      <div class="tree-content show">
+          <button class="web-btn" data-url="https://10.101.23.243/#/login">Kavoush Panel Kish</button>    
+          <button class="link-btn" data-url="http://localhost:8094/test/api/test-all-sync/1/1">Run sync test</button>          
+          <!-- <button class="link-btn" data-url="http://localhost:8094/test/api/test-all-sync/1/1">Run sync test</button> -->
+          <button id="resetProfilesKish" class="db-btn">Reset online profiles</button>
+           <button id="connectDbKish" class="db-btn">Clear SVG table</button>
+          <!-- <button class="link-btn" data-url="http://10.101.23.208:8086/api/unsec/cache/reset-online-profile/5952">Reset-online-profile-5952</button> -->
+          <!-- <button class="link-btn" data-url="http://10.101.23.208:8086/api/unsec/cache/reset-online-profile/7952">Reset-online-profile-7952</button>           -->
+      </div>
+    </div>
+    
+  <div class="link-container">
+    <div class="tree-container">    
+    <div class="tree-node">
+      <div class="tree-header" onclick="toggleTree(this)">
+        <span>Links</span>
+        <span class="caret">›</span>
+      </div>
+      <div class="tree-content show">
+          <button class="web-btn" data-url="http://10.101.151.2:8000/">Splunk Kish</button>          
+      </div>
+    </div>
+    
+    <div class="link-container">
+    <div class="tree-container">    
+    <div class="tree-node">
+      <div class="tree-header" onclick="toggleTree(this)">
+        <span>Deployments</span>
+        <button class="create-note-btn" id="refreshDeployment">reload</button>
+        <span class="caret">›</span>
+      </div>
+      <div class="tree-content show">
+         <div class="tree-header deploy-header">
+            <span>Deploy-131</span>
+            <button class="start-btn" data-url="https://localhost:8443/" id="start-deploy-131"> Start</button>            
+            <button class="stop-btn" data-url="https://localhost:8443/" id="stop-deploy-131" > Stop</button>            
+          </div>
+           <div class="tree-header deploy-header">
+            <span>Deploy-243</span>
+            <button class="start-btn" data-url="https://localhost:8443/" id="start-deploy-243"> Start</button>            
+            <button class="stop-btn" data-url="https://localhost:8443/" id="stop-deploy-243" > Stop</button>            
+          </div>
+          <!-- <button class="deploy-btn" data-url="https://localhost:8443/" id="deploy-131">Deploy-131</button>           -->
+          <!-- <button class="deploy-btn" data-url="https://localhost:8443/" id="deploy-243">Deploy-243</button>    -->
+      </div>
+    </div>
+
+    
+    <!-- <button class="link-btn" data-url="http://localhost:8093/test/api/test-all-sync/1/1">Test-all-sync</button> -->
+   <!-- <button class="link-btn" data-url="http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/5952">Reset-online-profile-5952</button>
+    <button class="link-btn" data-url="http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/7952">Reset-online-profile-7952</button>
+    -->
+    <button class="file-btn" data-file="kserverlist.txt">Kavoush Server List</button>
+    <button class="file-btn" data-file="other.txt">Other Data</button>
+    <button class="file-btn" data-file="instructions.txt">Instructions</button>    
+   
+  
+    <div class="tree-container">
+    <div class="tree-node">
+      <div class="tree-header" onclick="toggleTree(this)">
+        <span>My Notes</span>  <button class="create-note-btn" id="createNoteBtn" >+ Create Note</button>
+        <span class="caret">›</span>
+      </div>
+      <div class="tree-content show" id="notesTree">        
+      </div>
+    </div>
+    
+  </div>
+      <div id="file-content">
+      <pre id="file-display"></pre>
+    </div>
+
+    </div>
+
+  <script>      
+    // const { exec } = require('child_process');
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        getDeploymentStatus();
+        loadNotes();  
+    });
+
+    document.getElementById('workspace-header').addEventListener('click', () => {      
+      event.stopPropagation();    
+      window.electron.minimize();         
+    });
+
+    document.getElementById('createNoteBtn').addEventListener('click', () => {      
+       event.stopPropagation();
+        window.electron.createNote();
+        loadNotes();
+      });
+      
+    document.getElementById('refreshDeployment').addEventListener('click', () => {            
+       event.stopPropagation();       
+        window.electron.getDeployments();
+        getDeploymentStatus();
+      });
+      
+
+    document.getElementById('start-deploy-131').addEventListener('click', () => {                    
+      event.stopPropagation();       
+       const result =  window.electron.runDeployment("start","4f85a96b-0197-1000-31c1-8e983adc9aff").then( data => {                 
+            if (data.state == "RUNNING"){
+               const btnDeploy1 = document.getElementById('start-deploy-131');
+               btnDeploy1.style.backgroundColor = '#00b4d8';
+               const btnDeploy2 = document.getElementById('stop-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } else {
+               const btnDeploy2 = document.getElementById('start-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } 
+        });
+
+      });
+
+    document.getElementById('stop-deploy-131').addEventListener('click', () => {                    
+      event.stopPropagation();       
+      const result =  window.electron.runDeployment("stop","4f85a96b-0197-1000-31c1-8e983adc9aff").then( data => {                 
+            if (data.state == "STOPPED"){
+               const btnDeploy1 = document.getElementById('stop-deploy-131');
+               btnDeploy1.style.backgroundColor = '#e63946';
+               const btnDeploy2 = document.getElementById('start-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } else {
+               const btnDeploy2 = document.getElementById('stop-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } 
+        });
+
+      });
+
+    document.getElementById('start-deploy-243').addEventListener('click', () => {                    
+        event.stopPropagation();         
+        window.electron.openModal();
+    });
+
+    document.getElementById('stop-deploy-243').addEventListener('click', () => {                    
+        event.stopPropagation();         
+         const result =  window.electron.runDeployment("stop","8fb8d9df-e54d-3ae1-5881-3e06cd938fdd").then( data => {                 
+             if (data.state == "STOPPED"){
+               const btnDeploy1 = document.getElementById('stop-deploy-243');
+               btnDeploy1.style.backgroundColor = '#e63946';
+               const btnDeploy2 = document.getElementById('start-deploy-243');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } else {
+               const btnDeploy2 = document.getElementById('stop-deploy-243');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } 
+          });
+    });
+
+     document.getElementById('resetProfiles').addEventListener('click', () => {              
+        window.electron.sendCurlRequest("http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/5952")   
+        window.electron.sendCurlRequest("http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/7952")
+      });
+
+      document.getElementById('resetProfilesKish').addEventListener('click', () => {              
+        window.electron.sendCurlRequest("http://10.101.23.208:8086/api/unsec/cache/reset-online-profile/5952")   
+        window.electron.sendCurlRequest("http://10.101.23.208:8086/api/unsec/cache/reset-online-profile/7952")
+      });
+
+      
+
+     document.getElementById('connectDb').addEventListener('click', () => {              
+        window.electron.connectDb("teh");        
+      });
+
+    document.getElementById('connectDbKish').addEventListener('click', () => {              
+        window.electron.connectDb("kish");        
+      });
+    
+    // Tree view functionality
+    function toggleTree(header) {
+      const content = header.nextElementSibling;
+      const caret = header.querySelector('.caret');
+      
+     // Close all other trees if this one is opening
+     if (content){
+      if (!content.classList.contains('show')) {
+        document.querySelectorAll('.tree-content.show').forEach(openContent => {
+          if (openContent !== content) {
+            openContent.classList.remove('show');
+            openContent.previousElementSibling.querySelector('.caret').classList.remove('down');
+          }
+        });
+      }
+    }
+      
+      if (content){ content.classList.toggle('show');}
+      if (caret){ caret.classList.toggle('down'); }
+    }
+
+    // Initialize trees to be collapsed by default
+    document.querySelectorAll('.tree-header').forEach(header => {
+      toggleTree(header); // Start collapsed
+    });
+    
+     function getDeploymentStatus() {    
+
+          const result =  window.electron.getDeployments().then( data => {                         
+            
+           if (data.deploy131.status == "RUNNING"){              
+                const btnDeploy1 = document.getElementById('start-deploy-131');
+                btnDeploy1.style.backgroundColor = '#00b4d8';              
+            } else {              
+               const btnDeploy1 = document.getElementById('stop-deploy-131');
+               btnDeploy1.style.backgroundColor = '#e63946';              
+            }  
+            
+           if (data.deploy243.status == "RUNNING"){              
+                const btnDeploy1 = document.getElementById('start-deploy-243');
+                btnDeploy1.style.backgroundColor = '#00b4d8';              
+            } else {              
+               const btnDeploy1 = document.getElementById('stop-deploy-243');
+               btnDeploy1.style.backgroundColor = '#e63946';              
+            } 
+
+          })
+     }
+   // Load notes from disk
+    function loadNotes() {
+      
+      //    window.electron.readNote(fileName).then(content => {
+      //   fileEditor.value = content;
+      //   currentFile = fileName;
+      //   modal.style.display = 'block';
+      // });
+
+     const result =  window.electron.getNotes().then( data => {   
+                
+        const notesTree = document.getElementById('notesTree');
+        notesTree.innerHTML = '';
+        
+        if (data.error) {
+          notesTree.innerHTML = `<div style="color: red;">${data.error}</div>`;
+          return;
+        }
+        
+        if (data.length === 0) {
+          notesTree.innerHTML = '<div style="color: #666;">No notes available</div>';
+          return;
+        }
+        
+        data.forEach(note => {
+          const noteItem = document.createElement('div');
+          noteItem.className = 'note-item';
+          
+          const noteLink = document.createElement('button');
+          noteLink.className = 'file-btn note-name';
+          noteLink.textContent = note.name;
+          noteLink.onclick = (e) => {
+            e.stopPropagation();
+             window.electron.openFileDialog(note.path)
+            // ipcRenderer.send('open-file', {
+            //   filePath: note.path,
+            //   editable: false
+            // });
+          };
+          
+          // const editBtn = document.createElement('button');
+          // editBtn.className = 'file-btn edit-btn';
+          // editBtn.textContent = 'Edit';
+          // editBtn.onclick = (e) => {
+          //   e.stopPropagation();
+          //   ipcRenderer.send('open-file', {
+          //     filePath: note.path,
+          //     editable: true
+          //   });
+          // };
+          
+          noteItem.appendChild(noteLink);
+          notesTree.appendChild(noteItem);
+          // noteItem.appendChild(editBtn);
+        });
+                
+        }).catch(err => {
+          console.error('Failed to open file dialog:', err);
+        });                  
+    }
+
+   document.querySelectorAll('.web-btn').forEach(button => {      
+      button.addEventListener('click', () => {
+        const url = button.getAttribute('data-url');        
+           window.electron.openExternal(url);        
+      });
+    });
+    
+    document.querySelectorAll('.link-btn').forEach(button => {      
+      button.addEventListener('click', () => {
+        const url = button.getAttribute('data-url');
+        console.log(url)
+        window.electron.sendCurlRequest(url);
+      });
+    });
+    
+    
+    document.querySelectorAll('.file-btn').forEach(button => {
+          button.addEventListener('click', () => {              
+             const fileName = button.getAttribute('data-file');               
+              window.electron.openFileDialog(fileName).then(content => {
+             });              
+          });         
+    });
+
+    window.electron.onModalSelection((value) => {      
+      
+      if (value.state=="RUNNING"){
+            const btnDeploy1 = document.getElementById('start-deploy-243');
+            btnDeploy1.style.backgroundColor = '#00b4d8'
+
+            const btnDeploy2 = document.getElementById('stop-deploy-243');
+            btnDeploy2.style.backgroundColor = '#a4b1c9'; 
+      }        
+    });
+
+    // Add event listener for the new file button
+    // document.getElementById('showFileBtn').addEventListener('click', () => {
+    //   // API.send('open-chat', ''); 
+    //   // ipcRenderer.send('show-file-dialog');
+    //    const fileName = button.getAttribute('data-file');
+    //    window.electron.openFileDialog(fileName).then(filePath => {
+    //       if (filePath) {
+    //         console.log('Opening file at:', filePath);
+    //         // fetch(filePath)
+    //         //   .then(res => res.text())
+    //         //   .then(text => {
+    //         //     document.getElementById('file-display').textContent = text;
+    //         //   })
+    //         //   .catch(err => {
+    //         //     console.error('Failed to read the file:', err);
+    //         //   });
+    //       }
+    //     }).catch(err => {
+    //       console.error('Failed to open file dialog:', err);
+    //     });
+        //    
+    // });
+  
+    
+  </script>
+</body>
+</html>

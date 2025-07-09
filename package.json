@@ -1,0 +1,18 @@
+{
+  "name": "electron-link-widget",
+  "version": "1.0.0",
+  "description": "A widget with links that make cURL requests",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "latest"
+  },
+  "dependencies": {
+    "oracledb": "^6.8.0",
+    "uuid": "^11.1.0"
+  }
+}

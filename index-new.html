@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Link Widget</title>
+  <style>
+      * {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: -moz-none;
+        -o-user-select: none;
+        user-select: none;
+    }
+    body::-webkit-scrollbar,.tree-content::-webkit-scrollbar {
+      width: var(--sb-size)
+    }
+
+    body::-webkit-scrollbar-track ,.tree-content::-webkit-scrollbar-track {
+      background: var(--sb-track-color);
+      border-radius: 1px;
+    }
+
+    body::-webkit-scrollbar-thumb ,.tree-content::-webkit-scrollbar-thumb {
+      background: var(--sb-thumb-color);
+      border-radius: 1px;
+      
+    }
+    @supports not selector(::-webkit-scrollbar) {
+      body,.tree-content {
+        scrollbar-color: var(--sb-thumb-color)
+                        var(--sb-track-color);
+      }      
+    }
+
+   .tree-content {
+      padding: 5px 0 5px 5px;
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    body {
+      margin: 0;
+      /* padding: 10px; */
+      font-family: 'ubuntu', Arial, sans-serif;
+      /* background-color: rgba(240, 240, 240, 0.63); */
+      background-color: rgba(20, 20, 20, 0.856);
+      border-radius: 10px;
+      --sb-track-color: #dbdbdb;
+      --sb-thumb-color: #bdc2bf;
+      --sb-size: 5px;
+    }
+
+    .tree-content{
+      --sb-track-color: #dbdbdb;
+      --sb-thumb-color: #bdc2bf;
+      --sb-size: 5px;
+    }
+
+    button {
+      font-family: 'ubuntu', Arial, sans-serif;
+      border : none;
+      background-color: #a4b1c9;
+      cursor: pointer;
+    }
+    button:hover{
+        background-color: #808da5;
+    }
+    .link-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .file-btn , .db-btn  ,.deploy-btn {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      margin: 3px 0;
+      background-color: #93C536;
+      color: white;
+      border: none;
+      /* border-radius: 3px; */
+      cursor: pointer;
+      text-align: left;
+      transition: background-color 0.2s;
+      font-family: 'ubuntu', Arial, sans-serif;
+    }
+    .file-btn {
+      background-color: #4CAF50
+    }
+    .link-btn:hover ,  .file-btn:hover , .db-btn:hover , .web-btn:hover ,  .deploy-btn:hover, .start-btn:hover{
+      background-color: #93C536;
+      /* background-color: #3F8F43; */
+    }
+    .start-btn-active{
+      background-color: #00b4d8;
+    }
+    .stop-btn-active{
+      background-color: #e63946;
+    }
+    .drag-handle {
+      -webkit-app-region: drag;
+      height: 25px;
+      width: 100%;
+      background-color: transparent;
+      margin-bottom: 15px;
+      /* padding-top:5px;       */
+      text-align: center;
+      cursor: move;
+      font-family: 'ubuntu', Arial, sans-serif;
+      font-size:14px;      
+      position: fixed;
+      top:0;
+      left:0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+   .drag-handle button {
+      -webkit-app-region: no-drag; /* so button is clickable */      
+      border: none;            
+      cursor: pointer;
+      outline: none;
+      background: transparent;
+    }
+
+    .drag-handle button:active {
+         outline: none;
+    }
+
+    .tree-node {
+      margin-bottom: 5px;
+    }    
+    .deploy-header{
+      margin-top: 3px;
+    }
+    .deploy-header .start-btn{
+      outline: none;
+    }
+    .tree-header {
+      padding: 5px 5px;
+      background-color: #d1d1d185;
+      color: white;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      font-family: 'ubuntu', Arial, sans-serif;
+      width: 80vw;
+      color: #333;
+    }
+    .tree-header:hover {
+      /* background-color: #546E7A; */
+    }
+    .tree-content {
+      padding: 5px 0 5px 5px;
+      display: none;
+    }
+    .tree-content.show {
+      display: block;
+    }
+    .hidden{
+        display: none;
+    }
+   .deploy-panel{
+      max-width: 80vw;
+    }
+    .links-panel , .notes-panel, .deploy-panel, .usetest-panel , .splunk-panel{
+      margin: 10px;
+      max-width: 85vw;
+    }
+    .deploy-panel p{      
+      margin-bottom: 2rem;
+    }
+
+    .max-w-7xl {
+      max-width: 80rem; /* 1280px */
+    }
+
+    .min-h-2xl{
+      min-height: 14rem; /* 1280px */
+    }
+
+    .mx-auto {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .p-5 {
+      padding: 1.1rem; /* 32px */
+    }
+
+    .text-3xl {
+        font-size: 1.875rem; 
+      }
+
+   .font-bold {
+      font-weight: 700;
+    }
+
+    .mb-4 {
+      margin-bottom: 1rem; /* 16px */
+    }
+
+    .grid {
+      display: grid;
+    }
+
+    .grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    @media (min-width: 768px) {
+      .md\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .gap-6 {
+      gap: 1.5rem; /* 24px */
+    }
+
+    .mb-10 {
+      margin-bottom: 2.5rem; /* 40px */
+    }
+
+    .bg-gr{
+      position: fixed;
+      top:0;
+      left: 0;
+      /* background: url(image1.jpg); */
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      /* background-image: linear-gradient( 135deg, #ABDCFF 10%, #0396FF 100%); */
+      /* background-image: linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%);
+      background-image: linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%);
+      background-image: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);
+      background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
+      background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+      background-image: linear-gradient(-225deg, #DFFFCD 0%, #90F9C4 48%, #39F3BB 100%); */
+      transition: 0.5s;           
+    }
+   
+    #time{
+      margin-bottom: 0;
+    }
+
+    #date{
+      margin-top: 0;
+    }
+
+  .circle-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #686868;
+    transition: color 0.3s ease;
+    outline: none;
+    padding: 0 6px;
+    font-size: 10px;
+    display: inline-flex;
+    flex-direction: column;
+  }
+
+  .circle-button:hover {
+    background: none;
+    border: none;
+    color: #92d3e7; /* Change color on hover */
+  }
+  .usetest-panel button,.splunk-panel button{
+    width: 60px;
+  }
+
+  .links-panel{
+    width: 90vw;
+  }
+
+  .sidebar {
+  height: 100%; 
+  width: 0; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #5a5a5ad3;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 20px;
+  font-family: 'ubuntu', Arial, sans-serif;
+}
+
+.sidebar a {
+  padding: 8px 10px;
+  text-decoration: none;
+  font-size: 14px;
+  color: #b6b6b6;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  color: #f1f1f1;
+}
+
+.sidebar p {
+  color: #dbdbdb;
+  padding: 0 12px;
+}
+
+.notes-list{
+  width: 85vw;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.create-note-btn{
+  margin-left: 10px;
+}
+
+  </style>
+</head>
+<body>
+  <!-- <div class="drag-handle">
+    <div>&nbsp;</div>
+    <div>&nbsp;&nbsp;&nbsp;&nbsp;Workspace</div>  
+  <div><button  id="workspace-header">[ - ]</button></div>
+  </div> -->
+
+<div id="mySidebar" class="sidebar">
+  <div class="notes-panel hidden">
+      <button class="create-note-btn" id="createNoteBtn" >+ Create Note</button>
+      <div class="tree-content show notes-list" id="notesTree">        
+      </div>
+  </div>
+  <div class="deploy-panel hidden">
+  <p>Select deploy server to start or stop pipeline</p>
+         <div class="tree-content show">
+         <div class="tree-header deploy-header">
+            <span style="flex-grow: 8">Deploy-131</span>
+            <button class="start-btn" data-url="https://localhost:8443/" id="start-deploy-131"> Start</button>            
+            <button class="stop-btn" data-url="https://localhost:8443/" id="stop-deploy-131" > Stop</button>            
+          </div>
+           <div class="tree-header deploy-header">
+            <span style="flex-grow: 8">Deploy-243</span>
+            <button class="start-btn" data-url="https://localhost:8443/" id="start-deploy-243"> Start</button>            
+            <button class="stop-btn" data-url="https://localhost:8443/" id="stop-deploy-243" > Stop</button>            
+          </div>          
+      </div>
+  </div>
+  
+  <div class="usetest-panel hidden">
+  <p>Select deploy server to start or stop pipeline</p>
+         <div class="tree-content show">
+         <div class="tree-header deploy-header">
+            <span style="flex-grow: 8">Kavosuh Panel</span>
+            <button class="web-btn"  data-url="https://tej.kavosh.isc.co.ir:8001/#/login"> Open</button>                       
+          </div>
+           <div class="tree-header deploy-header">
+            <span style="flex-grow: 8">Run sync test</span>
+            <button class="link-btn" data-url="http://localhost:8093/test/api/test-all-sync/1/1"> Run</button>                        
+          </div>    
+           <div class="tree-header deploy-header">
+            <span style="flex-grow: 8" >Reset online profiles</span>
+            <button class="start-btn"  id="resetProfiles" > Reset</button>                        
+          </div>  
+          <div class="tree-header deploy-header">
+            <span style="flex-grow: 8">Clear SVG table</span>
+            <button class="start-btn" id="connectDb" > Clear</button>                        
+          </div>     
+      </div>
+  </div>
+  
+  <div class="links-panel hidden">          
+        <button class="file-btn" data-file="kserverlist.txt">Kavoush Server List</button>
+        <button class="file-btn" data-file="other.txt">Other Data</button>
+        <button class="file-btn" data-file="instructions.txt">Instructions</button> 
+   </div>
+
+  <div class="splunk-panel hidden">
+    <p>Select splunk server to open in browser</p>
+         <div class="tree-content show">
+         <div class="tree-header deploy-header">
+            <span style="flex-grow: 8">Splunk kish</span>
+            <button class="web-btn" data-url="http://10.101.151.2:8000/">Open</button>   
+          </div>          
+      </div>
+  </div>
+
+  <a  href="#" id="closeBtn">&times; Close</a>
+</div>
+
+<div class="mx-auto p-5 bg-gr min-h-2xl" style="width: 100vw;" id="main-panel">
+    <div class="drag-handle"></div>
+      <h1 class="text-3xl font-bold" id="time"></h1>
+      <h3 class="mb-4" id="date"></h4>   
+        <div style="margin-right: 20px;">
+          <p class="text-gray-600 mb-8" id="textPara" ></p>
+        </div>              
+      </p>
+
+  </div>
+
+  <div class="grid  ">
+
+    <div class="mx-auto" style="margin-top: 17rem;">
+      <button aria-label="Play" class="circle-button" id="usetest-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="display:block;">
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" />
+        </svg>
+        Usetest
+      </button>
+
+      <button aria-label="Notepad" class="circle-button" id="notes-btn" >
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">          
+          <circle cx="12" cy="12" r="11" stroke="currentColor" fill="none" />
+          <rect x="7" y="6" width="10" height="12" rx="1.5" ry="1.5" fill="none" stroke="currentColor" />
+          <line x1="9" y1="6" x2="9" y2="8" stroke="currentColor" />
+          <line x1="12" y1="6" x2="12" y2="8" stroke="currentColor" />
+          <line x1="15" y1="6" x2="15" y2="8" stroke="currentColor" />
+          <line x1="8" y1="10" x2="16" y2="10" stroke="currentColor" />
+          <line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" />
+          <line x1="8" y1="16" x2="16" y2="16" stroke="currentColor" />
+        </svg>
+        Notes
+      </button>
+
+      <button  class="circle-button"  aria-label="Lunch App" id="deploy-btn" >    
+        <!-- <svg fill="currentColor" width="36" height="36" viewBox="0 0 24 24" stroke-width="1.5"  xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="11" stroke="currentColor" fill="none" />
+              <g transform="translate(3,3) scale(0.7)">
+                
+              <path stroke-width="2.5"  fill="currentColor" d="M8.95305171,17.9846747 C8.72737466,19.1334216 7.71488744,20 6.5,20 L4.5,20 C4.22385763,20 4,19.7761424 4,19.5 L4,17.5 C4,16.2851126 4.86657841,15.2726253 6.0153253,15.0469483 L6.02714614,14.7041437 C6.04713299,14.1245251 6.10682628,13.555636 6.20352226,13 L2.5,13 C2.1462677,13 1.90438878,12.6427369 2.03576165,12.3143047 L4.03576165,7.31430466 C4.11169333,7.12447547 4.29554771,7 4.5,7 L9,7 C9.02538451,7 9.05032719,7.00189166 9.07469478,7.0055417 C11.4290981,4.32146349 14.9247139,2.67696313 18.771296,2.80960389 C19.3819666,2.8306615 19.9902263,2.89709634 20.5910446,3.008359 C20.7946429,3.04606238 20.9539376,3.20535713 20.991641,3.40895537 C21.812186,7.83989855 20.1522623,12.1558183 16.9947249,14.9271075 C16.9982004,14.9509022 17,14.9752409 17,15 L17,19.5 C17,19.7044523 16.8755245,19.8883067 16.6856953,19.9642383 L11.6856953,21.9642383 C11.3572631,22.0956112 11,21.8537323 11,21.5 L11,17.7949378 C10.4368132,17.8936903 9.86739064,17.9531458 9.29585627,17.9728539 L8.95305171,17.9846747 Z M7.98749247,17.6945992 L6.30540075,16.0125075 C5.56890748,16.1079151 5,16.7375198 5,17.5 L5,19 L6.5,19 C7.26248018,19 7.8920849,18.4310925 7.98749247,17.6945992 L7.98749247,17.6945992 Z M12,17.5770127 L12,20.7614835 L16,19.1614835 L16,15.7132231 C14.8178863,16.5520811 13.4713529,17.1925443 12,17.5770127 L12,17.5770127 Z M6.42079004,12 C6.80202391,10.5414825 7.44257093,9.19144113 8.28872675,8 L4.83851648,8 L3.23851648,12 L6.42079004,12 L6.42079004,12 Z M8.69991595,16.9928092 L9.26139399,16.9734479 C9.82252402,16.9540985 10.3814387,16.8930532 10.9335157,16.7908167 C16.9701904,15.672914 20.9957193,9.95997934 20.0664857,3.93363717 C19.626205,3.86599452 19.1822172,3.82436794 18.7368337,3.80900989 C12.4850041,3.59342956 7.24213247,8.48677642 7.02655214,14.738606 L7.00719083,15.300084 L8.69991595,16.9928092 Z M14,13 C12.3431458,13 11,11.6568542 11,10 C11,8.34314575 12.3431458,7 14,7 C15.6568542,7 17,8.34314575 17,10 C17,11.6568542 15.6568542,13 14,13 Z M14,12 C15.1045695,12 16,11.1045695 16,10 C16,8.8954305 15.1045695,8 14,8 C12.8954305,8 12,8.8954305 12,10 C12,11.1045695 12.8954305,12 14,12 Z"/>
+            </g>
+        </svg> -->        
+          <svg width="36" height="36" viewBox="0 0 24 24" stroke-width="1.5"  xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="11" stroke="currentColor" fill="none" />
+              <g transform="translate(4.5,4.5) scale(0.6)">
+                <path fill="currentColor" stroke="currentColor" stroke-width="2" d="M23,1 C23,1 16.471872,0.541707069 14,3 C13.9767216,3.03685748 10,7 10,7 L5,8 L2,10 L10,14 L14,22 L16,19 L17,14 C17,14 20.9631426,10.0232786 21,10 C23.4582929,7.5281282 23,1 23,1 Z M17,8 C16.4475,8 16,7.5525 16,7 C16,6.4475 16.4475,6 17,6 C17.5525,6 18,6.4475 18,7 C18,7.5525 17.5525,8 17,8 Z M7,17 C6,16 4,16 3,17 C2,18 2,22 2,22 C2,22 6,22 7,21 C8,20 8,18 7,17 Z"/>
+              </g>
+          </svg>
+           Deploy 
+      </button>
+
+      <button class="circle-button" id="sp-btn">
+        <svg width="36" height="36" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="3" >        
+          <circle cx="24" cy="24" r="23" stroke="currentColor" fill="none"  />        
+          <g transform="translate(6.5,6.5) scale(0.7)">
+            <path fill="currentColor" d="M37.5,4h-27A6.5,6.5,0,0,0,4,10.5v27A6.5,6.5,0,0,0,10.5,44h27A6.5,6.5,0,0,0,44,37.5v-27A6.5,6.5,0,0,0,37.5,4ZM33.6,26.1c0,.1,0,.2-.2.3L14.7,35.8c-.1.1-.3-.1-.3-.2V30.8c0-.1,0-.2.1-.2l13.6-6.8L14.5,16.9c-.1,0-.1-.1-.1-.2V11.9c0-.1.2-.3.3-.2l18.7,9.4a.5.5,0,0,1,.2.4Z"/>
+          </g>
+        </svg>
+        Splunk
+      </button>
+
+      <button class="circle-button" id="links-btn">          
+          <svg width="36" height="36" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"  stroke-width="1.8" >
+            <circle cx="16" cy="16" r="15" stroke="currentColor" fill="none"  />
+          <g fill="currentColor" transform="translate(7.5,7.5) scale(1)">
+          <path d="M11.141 1a3.893 3.893 0 00-2.738 1.093L7.314 3.175A.75.75 0 008.372 4.24l1.077-1.07a2.393 2.393 0 013.384 3.382l-1.881 1.88a2.393 2.393 0 01-3.608-.258.75.75 0 00-1.202.899 3.893 3.893 0 005.87.42l1.886-1.886.01-.009A3.893 3.893 0 0011.14 1z"/>
+          <path d="M7.019 5.365a3.893 3.893 0 00-3.032 1.13L2.102 8.382l-.01.01a3.893 3.893 0 005.505 5.504l1.084-1.084a.75.75 0 00-1.06-1.06l-1.07 1.07a2.393 2.393 0 01-3.384-3.384l1.881-1.88a2.393 2.393 0 013.609.258.75.75 0 101.2-.899A3.893 3.893 0 007.02 5.365z"/>
+          </g>
+          </svg>
+          Links
+      </button>
+    </div>
+        <!-- <div class="bg-white border rounded-lg shadow p-4">
+          <p class="font-semibold text-lg mb-2">Before</p>
+          <p class="text-sm text-gray-700">Interviews & Surveys</p>
+        </div>
+        <div class="bg-white border rounded-lg shadow p-4">
+          <p class="font-semibold text-lg mb-2">During</p>
+          <p class="text-sm text-gray-700">Online Reviews & Chat Logs</p>
+        </div>
+        <div class="bg-white border rounded-lg shadow p-4">
+          <p class="font-semibold text-lg mb-2">After</p>
+          <p class="text-sm text-gray-700">Testimonials</p>
+        </div>
+      </div> -->
+
+
+  <br>
+
+
+  <script>      
+    // const { exec } = require('child_process');
+
+     function updateTime() {
+      const now = new Date();
+      // Format time as HH:MM:SS      
+      const timeString = now.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+        // Format date with weekday, month, day, and year
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const dateString = now.toLocaleDateString(undefined, options);
+      document.getElementById('time').textContent = timeString;
+      document.getElementById('date').textContent = dateString;
+    }
+
+    // Update time immediately
+    updateTime();
+    // Update time every second
+    setInterval(updateTime, 1000);
+
+    const gradients = [      
+       'url(image1.jpg)',  
+       'url(image2.jpg)', 
+       'url(image3.jpg)', 
+       'url(image4.jpg)', 
+       'url(image5.jpg)', 
+       'url(image6.jpg)', 
+       'url(image7.jpg)', 
+       'url(image8.jpg)', 
+       'url(image9.jpg)', 
+       'url(image10.jpg)', 
+       'url(image11.jpg)', 
+        // 'linear-gradient( 135deg, #ABDCFF 10%, #0396FF 100%);',
+        // 'linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)',
+        // 'linear-gradient(to top, #fbc2eb 0%, #a6c1ee 100%)',
+        // 'linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)',
+        // 'linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)',
+        // 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
+        // 'linear-gradient(-225deg, #DFFFCD 0%, #90F9C4 48%, #39F3BB 100%)'
+      ];
+
+    function changeGradientBackground() {
+      const element = document.getElementById('main-panel'); // Use your element's actual ID
+      const randomIndex = Math.floor(Math.random() * gradients.length);
+      element.style.backgroundImage  = gradients[randomIndex];
+    }
+
+    changeGradientBackground();
+    setInterval(changeGradientBackground, 7200000)
+
+    const paragraph = document.getElementById('textPara');
+    const sidebar = document.getElementById('mySidebar');
+    const mainContent = document.getElementById('main-panel');
+
+    document.getElementById('usetest-btn').addEventListener('click', () => {
+      document.querySelector('.usetest-panel').classList.remove('hidden');
+      document.querySelector('.splunk-panel').classList.add('hidden');
+      document.querySelector('.deploy-panel').classList.add('hidden');
+      document.querySelector('.links-panel').classList.add('hidden');      
+      document.querySelector('.notes-panel').classList.add('hidden');
+      if (sidebar.style.width === '250px') {
+                  sidebar.style.width = '0';
+                  mainContent.style.marginLeft = '0';            
+       } else {
+          sidebar.style.width = '250px';
+          mainContent.style.marginLeft = '250px';
+       }  
+    });
+
+    document.getElementById('deploy-btn').addEventListener('click', () => {
+      document.querySelector('.deploy-panel').classList.remove('hidden');   
+      document.querySelector('.usetest-panel').classList.add('hidden');
+      document.querySelector('.splunk-panel').classList.add('hidden');
+      document.querySelector('.links-panel').classList.add('hidden');      
+      document.querySelector('.notes-panel').classList.add('hidden');      
+        if (sidebar.style.width === '250px') {
+            sidebar.style.width = '0';
+            mainContent.style.marginLeft = '0';            
+          } else {
+            sidebar.style.width = '250px';
+            mainContent.style.marginLeft = '250px';
+          }
+      // document.querySelector('.usetest-panel').classList.add('hidden');
+      // document.querySelector('.splunk-panel').classList.add('hidden');
+      // document.querySelector('.links-panel').classList.add('hidden');
+      // document.querySelector('.notes-panel').classList.add('hidden');
+    });
+
+    document.getElementById('sp-btn').addEventListener('click', () => {
+      document.querySelector('.splunk-panel').classList.remove('hidden');
+      document.querySelector('.usetest-panel').classList.add('hidden');
+      document.querySelector('.deploy-panel').classList.add('hidden');
+      document.querySelector('.links-panel').classList.add('hidden');      
+      document.querySelector('.notes-panel').classList.add('hidden');
+      if (sidebar.style.width === '250px') {
+            sidebar.style.width = '0';
+            mainContent.style.marginLeft = '0';            
+          } else {
+            sidebar.style.width = '250px';
+            mainContent.style.marginLeft = '250px';
+          }
+    });
+
+    document.getElementById('links-btn').addEventListener('click', () => {
+      document.querySelector('.links-panel').classList.remove('hidden');
+      document.querySelector('.usetest-panel').classList.add('hidden');
+      document.querySelector('.deploy-panel').classList.add('hidden');
+      document.querySelector('.splunk-panel').classList.add('hidden');      
+      document.querySelector('.notes-panel').classList.add('hidden');
+       if (sidebar.style.width === '250px') {
+            sidebar.style.width = '0';
+            mainContent.style.marginLeft = '0';            
+          } else {
+            sidebar.style.width = '250px';
+            mainContent.style.marginLeft = '250px';
+          }
+    });
+    
+     document.getElementById('notes-btn').addEventListener('click', () => {
+        document.querySelector('.notes-panel').classList.remove('hidden');
+        document.querySelector('.usetest-panel').classList.add('hidden');
+        document.querySelector('.deploy-panel').classList.add('hidden');
+        document.querySelector('.links-panel').classList.add('hidden');      
+        document.querySelector('.splunk-panel').classList.add('hidden');
+        if (sidebar.style.width === '250px') {
+            sidebar.style.width = '0';
+            mainContent.style.marginLeft = '0';            
+          } else {
+            sidebar.style.width = '250px';
+            mainContent.style.marginLeft = '250px';
+          }    
+    });
+
+     document.getElementById('closeBtn').addEventListener('click', () => {
+        sidebar.style.width = '0';
+        mainContent.style.marginLeft = '0';        
+      });
+
+    document.getElementById('usetest-btn').addEventListener('mouseenter', () => {
+      if (document.querySelector('.usetest-panel').classList.contains('hidden')){
+        paragraph.textContent = 'Run usetest on specific environment !';       
+      }
+    });
+
+    document.getElementById('usetest-btn').addEventListener('mouseleave', () => {
+      paragraph.textContent = '';
+    });
+
+   document.getElementById('notes-btn').addEventListener('mouseenter', () => {
+      if (document.querySelector('.notes-panel').classList.contains('hidden')){
+        paragraph.textContent = 'Create new note or open note from the list !';
+      }     
+
+    });
+
+    document.getElementById('notes-btn').addEventListener('mouseleave', () => {
+      paragraph.textContent = '';
+    });
+
+    document.getElementById('deploy-btn').addEventListener('mouseenter', () => {
+      if (document.querySelector('.deploy-panel').classList.contains('hidden')){
+        paragraph.textContent = 'Deploy service on specific environment !';
+      }
+    });
+
+    document.getElementById('deploy-btn').addEventListener('mouseleave', () => {
+      paragraph.textContent = '';
+    });
+    
+    document.getElementById('sp-btn').addEventListener('mouseenter', () => {            
+    });
+
+    document.getElementById('sp-btn').addEventListener('mouseleave', () => {
+      paragraph.textContent = '';
+    });
+
+    document.getElementById('links-btn').addEventListener('mouseenter', () => {
+      if (document.querySelector('.links-panel').classList.contains('hidden')){
+        paragraph.textContent = 'Open link from the list !';
+      }      
+    });
+
+    document.getElementById('links-btn').addEventListener('mouseleave', () => {
+      paragraph.textContent = '';
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {      
+        getDeploymentStatus();
+        loadNotes();  
+    });
+
+    // document.getElementById('workspace-header').addEventListener('click', () => {      
+    //   event.stopPropagation();    
+    //   window.electron.minimize();         
+    // });
+
+    document.getElementById('createNoteBtn').addEventListener('click', () => {      
+       event.stopPropagation();
+        window.electron.createNote();
+        loadNotes();
+      });
+      
+    // document.getElementById('refreshDeployment').addEventListener('click', () => {            
+    //    event.stopPropagation();       
+    //     window.electron.getDeployments();
+    //     getDeploymentStatus();
+    //   });
+      
+
+    document.getElementById('start-deploy-131').addEventListener('click', () => {                    
+      // event.stopPropagation();             
+       const result =  window.electron.runDeployment("start","4f85a96b-0197-1000-31c1-8e983adc9aff").then( data => {                 
+            if (data.state == "RUNNING"){
+               const btnDeploy1 = document.getElementById('start-deploy-131');
+               btnDeploy1.style.backgroundColor = '#00b4d8';
+               const btnDeploy2 = document.getElementById('stop-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } else {
+               const btnDeploy2 = document.getElementById('start-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } 
+        });
+
+      });
+
+    document.getElementById('stop-deploy-131').addEventListener('click', () => {                    
+      event.stopPropagation();       
+      const result =  window.electron.runDeployment("stop","4f85a96b-0197-1000-31c1-8e983adc9aff").then( data => {                 
+            if (data.state == "STOPPED"){
+               const btnDeploy1 = document.getElementById('stop-deploy-131');
+               btnDeploy1.style.backgroundColor = '#e63946';
+               const btnDeploy2 = document.getElementById('start-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } else {
+               const btnDeploy2 = document.getElementById('stop-deploy-131');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } 
+        });
+
+      });
+
+    document.getElementById('start-deploy-243').addEventListener('click', () => {                      
+        // event.stopPropagation();         
+        window.electron.openModal();
+    });
+
+    document.getElementById('stop-deploy-243').addEventListener('click', () => {                    
+        event.stopPropagation();         
+         const result =  window.electron.runDeployment("stop","8fb8d9df-e54d-3ae1-5881-3e06cd938fdd").then( data => {                 
+             if (data.state == "STOPPED"){
+               const btnDeploy1 = document.getElementById('stop-deploy-243');
+               btnDeploy1.style.backgroundColor = '#e63946';
+               const btnDeploy2 = document.getElementById('start-deploy-243');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } else {
+               const btnDeploy2 = document.getElementById('stop-deploy-243');
+               btnDeploy2.style.backgroundColor = '#a4b1c9';
+            } 
+          });
+    });
+
+     document.getElementById('resetProfiles').addEventListener('click', () => {              
+        window.electron.sendCurlRequest("http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/5952")   
+        window.electron.sendCurlRequest("http://172.16.67.131:8096/api/unsec/cache/reset-online-profile/7952")
+      });
+
+      // document.getElementById('resetProfilesKish').addEventListener('click', () => {              
+      //   window.electron.sendCurlRequest("http://10.101.23.208:8086/api/unsec/cache/reset-online-profile/5952")   
+      //   window.electron.sendCurlRequest("http://10.101.23.208:8086/api/unsec/cache/reset-online-profile/7952")
+      // });
+
+      
+
+     document.getElementById('connectDb').addEventListener('click', () => {              
+        window.electron.connectDb("teh");        
+      });
+
+    // document.getElementById('connectDbKish').addEventListener('click', () => {              
+    //     window.electron.connectDb("kish");        
+    //   });
+    
+    // Tree view functionality
+    function toggleTree(header) {
+      const content = header.nextElementSibling;
+      const caret = header.querySelector('.caret');
+      
+     // Close all other trees if this one is opening
+     if (content){
+      if (!content.classList.contains('show')) {
+        document.querySelectorAll('.tree-content.show').forEach(openContent => {
+          if (openContent !== content) {
+            openContent.classList.remove('show');
+            openContent.previousElementSibling.querySelector('.caret').classList.remove('down');
+          }
+        });
+      }
+    }
+      
+      if (content){ content.classList.toggle('show');}
+      if (caret){ caret.classList.toggle('down'); }
+    }
+
+    // Initialize trees to be collapsed by default
+    // document.querySelectorAll('.tree-header').forEach(header => {
+    //   toggleTree(header); // Start collapsed
+    // });
+    
+     function getDeploymentStatus() {    
+
+          const result =  window.electron.getDeployments().then( data => {                         
+            
+           if (data.deploy131.status == "RUNNING"){              
+                const btnDeploy1 = document.getElementById('start-deploy-131');
+                btnDeploy1.style.backgroundColor = '#00b4d8';              
+            } else {              
+               const btnDeploy1 = document.getElementById('stop-deploy-131');
+               btnDeploy1.style.backgroundColor = '#e63946';              
+            }  
+            
+           if (data.deploy243.status == "RUNNING"){              
+                const btnDeploy1 = document.getElementById('start-deploy-243');
+                btnDeploy1.style.backgroundColor = '#00b4d8';              
+            } else {              
+               const btnDeploy1 = document.getElementById('stop-deploy-243');
+               btnDeploy1.style.backgroundColor = '#e63946';              
+            } 
+
+          })
+     }
+   // Load notes from disk
+    function loadNotes() {
+      
+      //    window.electron.readNote(fileName).then(content => {
+      //   fileEditor.value = content;
+      //   currentFile = fileName;
+      //   modal.style.display = 'block';
+      // });
+
+     const result =  window.electron.getNotes().then( data => {   
+                
+        const notesTree = document.getElementById('notesTree');
+        notesTree.innerHTML = '';
+        
+        if (data.error) {
+          notesTree.innerHTML = `<div style="color: red;">${data.error}</div>`;
+          return;
+        }
+        
+        if (data.length === 0) {
+          notesTree.innerHTML = '<div style="color: #666;">No notes available</div>';
+          return;
+        }
+        
+        data.forEach(note => {
+          const noteItem = document.createElement('div');
+          noteItem.className = 'note-item';
+          
+          const noteLink = document.createElement('button');
+          noteLink.className = 'file-btn note-name';
+          noteLink.textContent = note.name;
+          noteLink.onclick = (e) => {
+            e.stopPropagation();
+             window.electron.openFileDialog(note.path)
+            // ipcRenderer.send('open-file', {
+            //   filePath: note.path,
+            //   editable: false
+            // });
+          };
+          
+          // const editBtn = document.createElement('button');
+          // editBtn.className = 'file-btn edit-btn';
+          // editBtn.textContent = 'Edit';
+          // editBtn.onclick = (e) => {
+          //   e.stopPropagation();
+          //   ipcRenderer.send('open-file', {
+          //     filePath: note.path,
+          //     editable: true
+          //   });
+          // };
+          
+          noteItem.appendChild(noteLink);
+          notesTree.appendChild(noteItem);
+
+          // noteItem.appendChild(editBtn);
+        });
+                
+        }).catch(err => {
+          console.error('Failed to open file dialog:', err);
+        });                  
+    }
+
+   document.querySelectorAll('.web-btn').forEach(button => {      
+      button.addEventListener('click', () => {
+        const url = button.getAttribute('data-url');        
+           window.electron.openExternal(url);        
+      });
+    });
+    
+    document.querySelectorAll('.link-btn').forEach(button => {      
+      button.addEventListener('click', () => {
+        const url = button.getAttribute('data-url');
+        console.log(url)
+        window.electron.sendCurlRequest(url);
+      });
+    });
+    
+    
+    document.querySelectorAll('.file-btn').forEach(button => {
+          button.addEventListener('click', () => {              
+             const fileName = button.getAttribute('data-file');               
+              window.electron.openFileDialog(fileName).then(content => {
+             });              
+          });         
+    });
+
+    window.electron.onModalSelection((value) => {      
+      
+      if (value.state=="RUNNING"){
+            const btnDeploy1 = document.getElementById('start-deploy-243');
+            btnDeploy1.style.backgroundColor = '#00b4d8'
+
+            const btnDeploy2 = document.getElementById('stop-deploy-243');
+            btnDeploy2.style.backgroundColor = '#a4b1c9'; 
+      }        
+    });
+
+    // Add event listener for the new file button
+    // document.getElementById('showFileBtn').addEventListener('click', () => {
+    //   // API.send('open-chat', ''); 
+    //   // ipcRenderer.send('show-file-dialog');
+    //    const fileName = button.getAttribute('data-file');
+    //    window.electron.openFileDialog(fileName).then(filePath => {
+    //       if (filePath) {
+    //         console.log('Opening file at:', filePath);
+    //         // fetch(filePath)
+    //         //   .then(res => res.text())
+    //         //   .then(text => {
+    //         //     document.getElementById('file-display').textContent = text;
+    //         //   })
+    //         //   .catch(err => {
+    //         //     console.error('Failed to read the file:', err);
+    //         //   });
+    //       }
+    //     }).catch(err => {
+    //       console.error('Failed to open file dialog:', err);
+    //     });
+        //    
+    // });
+  
+    
+  </script>
+</body>
+</html>
